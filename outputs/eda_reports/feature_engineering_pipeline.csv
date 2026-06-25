@@ -1,0 +1,6 @@
+Feature Group,Count,Formula / Window,Operational Purpose
+Lags,35,t - k (k=1..60 mins),Captures short-term momentum.
+Rolling Stats,60,10m / 30m / 60m windows,Smooths noise and identifies baseline.
+Differences,15,x_t - x_{t-k} (k=5..30),Measures temperature change velocity.
+Time Context,3,Hour / Month / Dayofweek,Captures ambient diurnal cycles.
+Raw Sensors,19,Current states (t),Establishes plant operational baseline.

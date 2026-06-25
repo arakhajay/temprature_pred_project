@@ -1,0 +1,9 @@
+Sensor Tag,Avg Abs Correlation,Action,Justification
+03TI_1024.PV,0.970,KEEP,Primary heat driver from column bottom.
+03PIC_1023.PV,0.945,KEEP,Vapor-liquid separator pressure.
+03TI_1081.PV,0.670,KEEP,Downstream cooling feedback temperature.
+03TIC_1009.PV,0.490,KEEP,Column feed temperature controller.
+03TI_1015.PV,0.967,REMOVE,Redundant (99% collinear with 03TI_1024.PV).
+03TI_1002.PV,0.430,REMOVE,Low correlation with target and redundant.
+03FIC_1085.PV,0.390,REMOVE,Low correlation (below 0.50 target filter).
+02FI_1000.PV,0.106,REMOVE,Low correlation (below 0.50 target filter).

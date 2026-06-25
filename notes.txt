@@ -1,0 +1,34 @@
+
+MICE imputation / forward fill 
+
+consicative nulls : imputation nulls strategy : if above 60 % MICE , below 60 % forward fill 
+
+correlation methods 
+
+perision ** above 80 % pairs will be discussed 
+spire man
+
+use both generate report 
+
+to remove variable --SME will give input 
+
+
+
+EDA steps 
+
+alarm episodes 
+
+missing values 
+
+cons null reports 
+
+correlations --parison 80 above without target 
+
+check if any alarm episodes came after trip duration to ensure falls alarms are removed properly in 10 m , to 60 mins , 120 mins .
+
+check alarm episodes analysis : 0 mins - 5 mins --chattering , and so on , what happened 10 min , 30 min , 60 min before and after alarm occur 
+
+data imputation --checks before that correlation checks etc 
+
+data spilites should have well distributions of alarms 
+for training , val , and test 

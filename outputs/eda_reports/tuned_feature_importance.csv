@@ -1,0 +1,6 @@
+Rank,Feature (15 Min),Importance (15m),Feature (60 Min),Importance (60m)
+1,hour,1130,hour,3814
+2,03TIC_1145.PV,945,month,1993
+3,03PIC_1023.PV_diff_5,933,03TIC_1145.PV,1648
+4,03TI_1081.PV_diff_5,768,03TI_1002.PV,1239
+5,month,722,03LIC_1034.PV,1156

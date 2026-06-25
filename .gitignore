@@ -1,0 +1,43 @@
+# Honeywell Temp Alarm Prediction - gitignore
+
+# System & OS
+.DS_Store
+Thumbs.db
+
+# Virtual Environments & Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.env
+
+# Workspace Plugin Settings
+.agents/
+.vscode/
+
+# Node Dependencies
+node_modules/
+package-lock.json
+
+# Raw Datasets & Archives
+03TIC_1023_PVHI/
+*.zip
+*.zip.*
+*.parquet
+
+# Large Output Files
+outputs/**/*.parquet
+outputs/**/*.html
+outputs/new_approach_features.parquet
+outputs/comparison_predictions.parquet
+outputs/test_predictions.parquet
+outputs/first_cut_new/test_predictions.parquet
+outputs/tuned_new/comparison_predictions.parquet
+outputs/eda_reports/tags_trend_interactive.html
+
+# Models
+# If we wish to ignore all binary models to keep the repo size small:
+# models/**/*.pkl

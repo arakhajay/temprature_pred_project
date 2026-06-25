@@ -1,0 +1,20 @@
+Column,Null_Percentage,Strategy,Rationale
+03TI_1002.PV,0.1506,MICE,Max consecutive null duration (2223.0 min) > 60 min
+02FI_1000.PV,0.0331,MICE,Max consecutive null duration (85.0 min) > 60 min
+03FIC_1085.PV,0.0156,FFill + BFill,Max consecutive null duration (9.0 min) ≤ 60 min
+03PDI_1077.PV,0.0006,FFill + BFill,Max consecutive null duration (1.0 min) ≤ 60 min
+03TIC_1145.PV,0.0005,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03PIC_1013.PV,0.0005,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03LIC_1016.PV,0.0004,FFill + BFill,Max consecutive null duration (1.0 min) ≤ 60 min
+03PIC_1068.PV,0.0004,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03TI_1108.PV,0.0004,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03PDI_1020.PV,0.0004,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03PIC_1023.PV,0.0004,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03PI_1409.PV,0.0003,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03LIC_1034.PV,0.0002,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03TIC_1009.PV,0.0002,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03TIC_1023.PV,0.0002,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03TI_1005.PV,0.0002,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03TI_1015.PV,0.0002,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03TI_1024.PV,0.0002,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min
+03TI_1081.PV,0.0002,FFill + BFill,Max consecutive null duration (0.0 min) ≤ 60 min

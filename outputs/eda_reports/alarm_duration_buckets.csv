@@ -1,0 +1,7 @@
+Bucket,Episode_Count,Total_Duration_Minutes,Pct_of_Episodes
+0 min (instantaneous),0,0.0,0.0
+0–1 min (noise/chattering),305,305.0,19.54
+1–5 min (short spikes),291,880.0,18.64
+5–15 min (moderate upsets),238,2250.0,15.25
+15–60 min (significant upsets),142,4018.0,9.1
+60+ min (sustained events),214,53824.0,13.71

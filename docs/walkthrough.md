@@ -34,28 +34,34 @@ The advanced analysis of the 4-year continuous history (2,019,221 records) yield
   - `03TI_1002.PV` (max gap ~37 hours) and `02FI_1000.PV` (max gap 85 minutes) exceeded 60 minutes and were imputed using MICE.
   - All other 17 columns had max gaps ≤ 10 minutes and were successfully imputed using FFill+BFill, ensuring no remaining null imbalances.
 
-### B. Multi-Method Triple Correlation (Slides 6-9, PDF Section 2)
+### B. DCS Operational Limits & Outliers (Slide 6, PDF Section 1.5)
+* **Strategy**: Checked sensor readings against the DCS configuration limits (`03TIC_1023_PVLO_PVHI.csv`). Check normal warning range crossings (`PV LOW` to `PV HIGH`) and extreme trip breaches (`EXT PV LOW` to `EXT PV HIGH`), which serve as outlier indicators.
+* **Findings**:
+  - **0 Rows Breach Extreme Trip Limits**: Across all 19 sensors (2,019,221 records), not a single data point breached the extreme trip limits. This confirms that our preprocessing successfully removed trip/shutdown transients, yielding a physically clean baseline dataset with zero instrument outliers.
+  - **Normal Warning Crossings**: A few sensors occasionally crossed warning limits. Most notably, C3 suction pressure (`03PIC_1013.PV`) crossed its 300.0 barg warning limit in 13.85% of records (up to 318.26 barg), but since `EXT PV HIGH` is undefined for it, these are not classified as outliers.
+
+### C. Multi-Method Triple Correlation (Slides 7-10, PDF Section 2)
 * **Strategy**: Ran Pearson (linear), Spearman (monotonic rank), and Distance Correlation (non-linear).
-* **Pearson Inter-Variable Analysis**: Slide 6 and PDF Table 3 show **only inter-variable collinear pairs** ($|r| \ge 0.80$, excluding target tag) to identify redundant sensors for potential removal by the Subject Matter Expert (SME).
+* **Pearson Inter-Variable Analysis**: Slide 7 and PDF Table 3 show **only inter-variable collinear pairs** ($|r| \ge 0.80$, excluding target tag) to identify redundant sensors for potential removal by the Subject Matter Expert (SME).
 * **Findings**: 
   - Identified highly collinear inter-variable pairs representing physically close sensors (e.g. `03TI_1015.PV & 03TI_1024.PV` at $r = 0.9896$, `03PIC_1023.PV & 03TI_1015.PV` at $r = 0.9796$).
   - Large Pearson-Spearman gaps ($> 0.30$) in pressure/delta-P pairs and strong Distance Correlation dependencies (up to 0.71) validate the use of non-linear tree models (LightGBM).
 
-### C. Alarm Duration & Chattering Detection (Slides 10-11, PDF Section 3)
+### D. Alarm Duration & Chattering Detection (Slides 11-12, PDF Section 3)
 * **Bucketing**: Analyzed 1,561 distinct alarm events.
   - **Chattering (0-1 min)**: 304 episodes represent 19.5% of total events but under 0.7% of total downtime.
   - **Sustained (60m+)**: 214 episodes represent 13.7% of events but account for **87.8% of all alarm downtime** (53,829 minutes).
 * **Chattering Isolation**: 360 chattering sequences (episodes $\le 1$ min separated by $< 5$ min normal runtime) represent control loop noise. The ML predictor should ignore these to avoid operator alarm fatigue.
 
-### D. Pre/Post-Alarm Behavioral Profiles (Slide 12, PDF Section 4)
+### E. Pre/Post-Alarm Behavioral Profiles (Slide 13, PDF Section 4)
 * **Pre-Alarm (30m Lead)**: Overhead temp (`03TIC_1023.PV`) rises at **$+0.0132°C/\text{min}$** (+$0.39°C$ over 30m). Column bottom inlet temp (`03TI_1024.PV`) leads at **$+0.0155°C/\text{min}$** (+$0.47°C$ over 30m), confirming heat climbs from the column bottom.
 * **Post-Alarm Cooldown**: System cools down slowly at **$-0.0125°C/\text{min}$**. It takes an average of **$42.5$ minutes** for the column to return to its stable baseline ($< 20.0°C$) after clearing the $21.0°C$ threshold.
 
-### E. Post-Trip False Alarm Check (Slide 13, PDF Section 4)
+### F. Post-Trip False Alarm Check (Slide 14, PDF Section 4)
 * **Strategy**: Analyzed alarm crossings starting within 10, 20, 60, and 120 minutes following the restart of the 85 plant trips.
 * **Findings**: Only 12 of 1,561 alarms (0.7%) occurred within 120 minutes of trip ends. Post-trip thermal residuals do not cause widespread false alarms.
 
-### F. Split Balance & Seasonal Trends (Slides 13-14, PDF Section 5)
+### G. Split Balance & Seasonal Trends (Slides 14-15, PDF Section 5)
 * **Splits**: Alarm episodes are properly balanced across the chronological splits:
   - **Train (2022-2025)**: 1,169 episodes (74.89% of events), average duration 43.67m.
   - **Val (Mid 2025)**: 199 episodes (12.75% of events), average duration 37.72m.
@@ -64,7 +70,7 @@ The advanced analysis of the 4-year continuous history (2,019,221 records) yield
 
 ---
 
-## 3. Executive Slide Deck Structure (20 Slides)
+## 3. Executive Slide Deck Structure (21 Slides)
 
 The presentation (`docs/EDA_Presentation.pptx`) is designed using professional, consistent widescreen slides:
 * **Slide 1**: Title / Cover Slide (Premium Dark Navy Theme)
@@ -72,21 +78,22 @@ The presentation (`docs/EDA_Presentation.pptx`) is designed using professional, 
 * **Slide 3**: Data Completeness & Gaps
 * **Slide 4**: Consecutive Nulls Analysis
 * **Slide 5**: Imputation Strategy & Results (Updated with consecutive gap threshold rule and separate Pre/Post Imputation Distribution charts side-by-side)
-* **Slide 6**: Multi-Method Correlation: Pearson (Updated with inter-variable pairs only)
-* **Slide 7**: Multi-Method Correlation: Spearman
-* **Slide 8**: Multi-Method Correlation: Distance Correlation
-* **Slide 9**: Target Correlation Rankings
-* **Slide 10**: Alarm Episode Durations
-* **Slide 11**: Alarm Chattering & Windowing
-* **Slide 12**: Pre-Alarm Thermodynamic Ramping
-* **Slide 13**: Post-Trip & Split Balance (Updated with episode-level splits: Train=74.89%, Val=12.75%, Test=12.36%)
-* **Slide 14**: Monthly & Seasonal Alarm Trends
-* **Slide 15**: Feature Selection Strategy (Correlation filters & thermodynamic context)
-* **Slide 16**: Feature Engineering Pipeline (Rolling statistics, lag structures, differences, and SME drop overrides)
-* **Slide 17**: First-Cut Model Performance (Precision, recall, F1-score, FAR across 5, 15, 30, 60m horizons)
-* **Slide 18**: Model Tuning & Optimization (Optuna hyperparameter study results and comparison)
-* **Slide 19**: Tuned Model Feature Importance (Key predictive drivers per horizon)
-* **Slide 20**: Conclusions & Recommendations (Premium Dark Navy Theme)
+* **Slide 6**: DCS Operational Limits & Outliers (New Slide presenting safety warning crossings and confirming zero extreme trip breaches)
+* **Slide 7**: Multi-Method Correlation: Pearson (Updated with inter-variable pairs only)
+* **Slide 8**: Multi-Method Correlation: Spearman
+* **Slide 9**: Multi-Method Correlation: Distance Correlation
+* **Slide 10**: Target Correlation Rankings
+* **Slide 11**: Alarm Episode Durations
+* **Slide 12**: Alarm Chattering & Windowing
+* **Slide 13**: Pre-Alarm Thermodynamic Ramping
+* **Slide 14**: Post-Trip & Split Balance (Updated with episode-level splits: Train=74.89%, Val=12.75%, Test=12.36%)
+* **Slide 15**: Monthly & Seasonal Alarm Trends
+* **Slide 16**: Feature Selection Strategy (Correlation filters & thermodynamic context)
+* **Slide 17**: Feature Engineering Pipeline (Rolling statistics, lag structures, differences, and SME drop overrides)
+* **Slide 18**: First-Cut Model Performance (Precision, recall, F1-score, FAR across 5, 15, 30, 60m horizons)
+* **Slide 19**: Model Tuning & Optimization (Optuna hyperparameter study results and comparison)
+* **Slide 20**: Tuned Model Feature Importance (Key predictive drivers per horizon)
+* **Slide 21**: Conclusions & Recommendations (Premium Dark Navy Theme)
 
 ---
 

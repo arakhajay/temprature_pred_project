@@ -387,6 +387,43 @@ if (s5Table.length > 0) {
 }
 
 // ============================================================================
+// Slide 5b: DCS Operational Limits & Outliers (New Slide)
+// ============================================================================
+const limitsRaw = readCSV("sensor_limits_analysis.csv");
+let sLimitsTable = [];
+if (limitsRaw.length > 1) {
+  const limitsHeaders = limitsRaw[0];
+  const pctIdx = limitsHeaders.indexOf("Normal_Crossed_Pct");
+  const tagIdx = limitsHeaders.indexOf("Tag");
+  const limitIdx = limitsHeaders.indexOf("PV_HIGH");
+  const crossedIdx = limitsHeaders.indexOf("Normal_Crossed");
+
+  const limitsRows = limitsRaw.slice(1)
+    .filter(r => parseFloat(r[crossedIdx]) > 0)
+    .sort((a, b) => parseFloat(b[pctIdx]) - parseFloat(a[pctIdx]));
+
+  sLimitsTable.push(["Sensor Tag", "Warning Limit", "Crossed Rows", "Crossed %"]);
+  limitsRows.slice(0, 4).forEach(r => {
+    sLimitsTable.push([r[tagIdx], r[limitIdx], parseInt(r[crossedIdx]).toLocaleString(), parseFloat(r[pctIdx]).toFixed(4) + "%"]);
+  });
+}
+createSlideWithAssets(
+  "DCS Operational Limits & Outliers",
+  "DCS Safety Range Check",
+  [
+    { text: "No Extreme Breaches:\n", options: { bold: true, color: COLOR_TEAL } },
+    { text: "Across all 19 sensors and 2,019,221 rows in the operational dataset, 0 rows breach the extreme DCS trip limits (EXT PV LOW to EXT PV HIGH).\n\n", options: { color: COLOR_SLATE } },
+    { text: "Operational Data Integrity:\n", options: { bold: true, color: COLOR_NAVY } },
+    { text: "This confirms that our preprocessing has successfully removed trip and shutdown transient periods, resulting in a clean baseline dataset with zero instrument outliers.\n\n", options: { color: COLOR_SLATE } },
+    { text: "Warning Level Crossings:\n", options: { bold: true, color: COLOR_NAVY } },
+    { text: "Only a few sensors cross warning limits. C3 suction pressure (03PIC_1013.PV) runs above warning threshold in 13.85% of rows, but runs safely under trip limits.", options: { color: COLOR_SLATE } }
+  ],
+  "sensor_limits_analysis.png",
+  sLimitsTable,
+  [1.4, 0.9, 0.9, 1.0]
+);
+
+// ============================================================================
 // Slide 6: Multi-Method Correlation: Pearson
 // ============================================================================
 const s6Table = filterCSV("pearson_inter_variable_high_correlation_pairs.csv", ["Variable_1", "Variable_2", "Pearson_r"], 5);

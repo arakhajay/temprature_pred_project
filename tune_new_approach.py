@@ -76,10 +76,11 @@ def preprocess_and_feature_engineering():
 def run_tuning():
     df = preprocess_and_feature_engineering()
     
-    # Extract feature list
-    exclude_cols = ['target_5m', 'target_15m', 'target_30m', 'target_60m']
-    feature_cols = [col for col in df.columns if col not in exclude_cols]
-    
+    # Load selected features
+    import json
+    with open("outputs/selected_features_by_horizon.json", "r") as f:
+        selected_features_by_horizon = json.load(f)
+        
     # Define splits chronologically (New splits)
     train_end = pd.to_datetime('2025-06-12 23:59:00')
     val_end = pd.to_datetime('2025-08-09 23:59:00')
@@ -94,17 +95,19 @@ def run_tuning():
         print(f"==================================================")
         
         target_name = f'target_{h}m'
+        feature_cols_h = selected_features_by_horizon[f'{h}m']
+        print(f"Number of selected features for {h}m: {len(feature_cols_h)}")
         
         # Prepare datasets (drop rows where target is NaN)
-        data_h = df[feature_cols + [target_name]].dropna(subset=[target_name])
+        data_h = df[feature_cols_h + [target_name]].dropna(subset=[target_name])
         
         # Chronological splits
         train_data = data_h.loc[:train_end]
         val_data = data_h.loc[train_end + pd.Timedelta(minutes=1):val_end]
         
         # Downsample training and validation sets for 10x faster tuning
-        X_train, y_train = train_data[feature_cols].iloc[::8], train_data[target_name].iloc[::8]
-        X_val, y_val = val_data[feature_cols].iloc[::8], val_data[target_name].iloc[::8]
+        X_train, y_train = train_data[feature_cols_h].iloc[::8], train_data[target_name].iloc[::8]
+        X_val, y_val = val_data[feature_cols_h].iloc[::8], val_data[target_name].iloc[::8]
         
         print(f"Data shapes (Downsampled) - Train: {X_train.shape}, Val: {X_val.shape}")
         

@@ -84,15 +84,17 @@ def train_and_evaluate():
     # 1. Feature Engineering
     df = preprocess_and_feature_engineering()
     
-    # Extract feature list
-    exclude_cols = ['target_5m', 'target_15m', 'target_30m', 'target_60m']
-    feature_cols = [col for col in df.columns if col not in exclude_cols]
-    
-    # Save feature names list
-    with open(os.path.join(OUTPUT_DIR, "feature_names.txt"), "w") as f:
-        f.write("\n".join(feature_cols))
+    # Load selected features
+    import json
+    with open("outputs/selected_features_by_horizon.json", "r") as f:
+        selected_features_by_horizon = json.load(f)
         
-    print(f"Total features: {len(feature_cols)}")
+    # Save a copy of feature lists for diagnostics
+    for h_key, f_list in selected_features_by_horizon.items():
+        with open(os.path.join(OUTPUT_DIR, f"feature_names_{h_key}.txt"), "w") as f_out:
+            f_out.write("\n".join(f_list))
+            
+    print("Loaded selected features by horizon.")
     
     # Define splits chronologically
     train_end = pd.to_datetime('2025-06-12 23:59:00')
@@ -110,18 +112,20 @@ def train_and_evaluate():
         print(f"=========================================")
         
         target_name = f'target_{h}m'
+        feature_cols_h = selected_features_by_horizon[f'{h}m']
+        print(f"Number of selected features for {h}m: {len(feature_cols_h)}")
         
         # Prepare datasets (drop rows where target is NaN)
-        data_h = df[feature_cols + [target_name]].dropna(subset=[target_name])
+        data_h = df[feature_cols_h + [target_name]].dropna(subset=[target_name])
         
         # Chronological splits
         train_data = data_h.loc[:train_end]
         val_data = data_h.loc[train_end + pd.Timedelta(minutes=1):val_end]
         test_data = data_h.loc[val_end + pd.Timedelta(minutes=1):]
         
-        X_train, y_train = train_data[feature_cols], train_data[target_name]
-        X_val, y_val = val_data[feature_cols], val_data[target_name]
-        X_test, y_test = test_data[feature_cols], test_data[target_name]
+        X_train, y_train = train_data[feature_cols_h], train_data[target_name]
+        X_val, y_val = val_data[feature_cols_h], val_data[target_name]
+        X_test, y_test = test_data[feature_cols_h], test_data[target_name]
         
         print(f"Train shape: {X_train.shape}, Val shape: {X_val.shape}, Test shape: {X_test.shape}")
         

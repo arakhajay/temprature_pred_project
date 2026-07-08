@@ -1,0 +1,5 @@
+Horizon,Version,F1-Score,Precision,Recall,False Alarm Rate,MAE (degC),RMSE (degC)
+5 Min,LSTM (All Features),90.11%,95.43%,85.35%,0.0549%,0.1465,0.2548
+15 Min,LSTM (All Features),85.85%,84.20%,87.58%,0.2211%,0.2406,0.4136
+30 Min,LSTM (All Features),81.37%,87.06%,76.39%,0.1528%,0.3249,0.5501
+60 Min,LSTM (All Features),73.80%,66.60%,82.74%,0.5584%,0.4469,0.6881

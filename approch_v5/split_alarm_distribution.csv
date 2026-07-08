@@ -1,0 +1,4 @@
+Split,Total_Rows,Num_Episodes,Episode_Pct,Avg_Episode_Duration_Min,Alarm_Rows,Normal_Rows,Alarm_Pct,Median_Episode_Duration_Min
+Train (2022-2025),1808715,1169,74.89,43.67,52218,1756497,2.887,4.0
+Val (Mid 2025),83520,199,12.75,37.72,7705,75815,9.225,1.0
+Test (Late 2025),220290,193,12.36,14.1,2914,217376,1.323,1.0

@@ -41,3 +41,9 @@ outputs/eda_reports/tags_trend_interactive.html
 # Models
 # If we wish to ignore all binary models to keep the repo size small:
 # models/**/*.pkl
+
+# Ignore all HTML files in any subdirectory
+**/*.html
+**/*.zip
+**/*.parquet
+

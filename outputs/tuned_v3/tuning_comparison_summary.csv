@@ -1,0 +1,9 @@
+Horizon,Version,F1-Score,Precision,Recall,False Alarm Rate,MAE (degC),RMSE (degC)
+5 Min,First-Cut Baseline,90.78%,90.68%,90.87%,0.1255%,0.1347,0.2720
+5 Min,Tuned Model,91.11%,91.84%,90.39%,0.1080%,0.1349,0.2730
+15 Min,First-Cut Baseline,86.96%,88.60%,85.38%,0.1477%,0.2301,0.4202
+15 Min,Tuned Model,86.95%,88.66%,85.31%,0.1468%,0.2292,0.4204
+30 Min,First-Cut Baseline,84.21%,85.45%,83.01%,0.1902%,0.3126,0.5458
+30 Min,Tuned Model,84.27%,85.86%,82.74%,0.1832%,0.3121,0.5419
+60 Min,First-Cut Baseline,72.47%,75.47%,69.70%,0.3047%,0.4261,0.6716
+60 Min,Tuned Model,72.74%,74.15%,71.38%,0.3347%,0.4196,0.6730

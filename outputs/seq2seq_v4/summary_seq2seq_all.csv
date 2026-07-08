@@ -1,0 +1,5 @@
+Horizon,Version,F1-Score,Precision,Recall,False Alarm Rate,MAE (degC),RMSE (degC)
+5 Min,Seq2Seq (All Features),90.26%,88.94%,91.63%,0.1533%,0.1469,0.2665
+15 Min,Seq2Seq (All Features),85.34%,85.99%,84.69%,0.1857%,0.2445,0.4269
+30 Min,Seq2Seq (All Features),78.43%,81.68%,75.43%,0.2277%,0.3489,0.5732
+60 Min,Seq2Seq (All Features),63.57%,70.24%,58.06%,0.3312%,0.4974,0.7533

@@ -1,7 +1,7 @@
 Horizon,Version,F1-Score,Precision,Recall,False Alarm Rate,MAE (degC),RMSE (degC)
 5 Min,LSTM (V5 - 12 Features),89.20%,94.10%,84.80%,0.0700%,0.151,0.261
 5 Min,Seq2Seq (V5 - 12 Features),89.50%,87.90%,91.20%,0.1650%,0.152,0.269
-15 Min,LSTM (V5 - 12 Features),85.90%,87.50%,84.30%,0.1520%,0.243,0.418
+15 Min,LSTM (V5 - 12 Features),0.00%,0.00%,0.00%,2.6500%,0.2952,0.3303
 15 Min,Seq2Seq (V5 - 12 Features),84.10%,80.40%,88.20%,0.2980%,0.249,0.431
 30 Min,LSTM (V5 - 12 Features),81.10%,84.90%,77.60%,0.1790%,0.331,0.561
 30 Min,Seq2Seq (V5 - 12 Features),77.50%,79.10%,76.00%,0.2610%,0.354,0.584

@@ -126,26 +126,61 @@ lstm, seq2seq, scaler, features = load_v5_models_and_scaler()
 # ----------------------------------------------------------------
 def compute_v5_features(df_history, target_col="03TIC_1023.PV"):
     """
-    Computes the exact 12 selected features on the fly.
+    Computes the exact 12 selected features on the fly dynamically.
     """
     df_slice = df_history.tail(65).copy()
     current_time = df_slice.index[-1]
     
-    # Time context
-    df_slice['hour'] = current_time.hour
-    df_slice['month'] = current_time.month
-    
-    # Lags
-    df_slice['03TIC_1023.PV_lag_15'] = df_slice['03TIC_1023.PV'].shift(15)
-    df_slice['03TIC_1023.PV_lag_30'] = df_slice['03TIC_1023.PV'].shift(30)
-    
-    # Delta Differences
-    df_slice['03TIC_1023.PV_diff_15'] = df_slice['03TIC_1023.PV'] - df_slice['03TIC_1023.PV'].shift(15)
-    
-    # Rolling aggregations
-    df_slice['03TI_1024.PV_roll_mean_30'] = df_slice['03TI_1024.PV'].rolling(window=30, min_periods=1).mean()
-    df_slice['03TI_1024.PV_roll_std_30'] = df_slice['03TI_1024.PV'].rolling(window=30, min_periods=1).std()
-    
+    for feat in features:
+        if feat in df_slice.columns:
+            continue
+        elif feat == 'hour':
+            df_slice['hour'] = current_time.hour
+        elif feat == 'month':
+            df_slice['month'] = current_time.month
+        elif feat == 'dayofweek':
+            df_slice['dayofweek'] = current_time.dayofweek
+        elif feat == 'temp_pressure_product':
+            df_slice['temp_pressure_product'] = df_slice['03TIC_1023.PV'] * df_slice['03PIC_1023.PV']
+        elif feat == 'temp_delta_bottom_top':
+            df_slice['temp_delta_bottom_top'] = df_slice['03TI_1024.PV'] - df_slice['03TIC_1023.PV']
+        elif '_lag_' in feat:
+            parts = feat.split('_lag_')
+            base_col = parts[0]
+            lag_val = int(parts[1])
+            df_slice[feat] = df_slice[base_col].shift(lag_val)
+        elif '_diff_' in feat:
+            parts = feat.split('_diff_')
+            base_col = parts[0]
+            diff_val = int(parts[1])
+            df_slice[feat] = df_slice[base_col] - df_slice[base_col].shift(diff_val)
+        elif '_roll_mean_' in feat:
+            parts = feat.split('_roll_mean_')
+            base_col = parts[0]
+            w_val = int(parts[1])
+            df_slice[feat] = df_slice[base_col].rolling(window=w_val, min_periods=1).mean()
+        elif '_roll_std_' in feat:
+            parts = feat.split('_roll_std_')
+            base_col = parts[0]
+            w_val = int(parts[1])
+            df_slice[feat] = df_slice[base_col].rolling(window=w_val, min_periods=1).std()
+        elif '_roll_max_' in feat:
+            parts = feat.split('_roll_max_')
+            base_col = parts[0]
+            w_val = int(parts[1])
+            df_slice[feat] = df_slice[base_col].rolling(window=w_val, min_periods=1).max()
+        elif '_roll_min_' in feat:
+            parts = feat.split('_roll_min_')
+            base_col = parts[0]
+            w_val = int(parts[1])
+            df_slice[feat] = df_slice[base_col].rolling(window=w_val, min_periods=1).min()
+        elif '_expanding_mean' in feat:
+            base_col = feat.split('_expanding_mean')[0]
+            df_slice[feat] = df_slice[base_col].expanding(min_periods=1).mean()
+        elif '_expanding_max' in feat:
+            base_col = feat.split('_expanding_max')[0]
+            df_slice[feat] = df_slice[base_col].expanding(min_periods=1).max()
+            
     feature_row = df_slice.tail(1)[features].copy()
     return feature_row
 

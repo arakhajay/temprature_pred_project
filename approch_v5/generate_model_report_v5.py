@@ -445,53 +445,63 @@ def generate_pdf(output_path="docs/Model_Performance_Report_v5.pdf"):
         ))
     story.append(PageBreak())
     
-    # ================= PAGE 5: TWO-PASS FEATURE SELECTION =================
-    story.append(Paragraph("4. Two-Pass Feature Selection Pipeline", h1_style))
+    # ================= PAGE 5: THREE-PHASE FEATURE SELECTION =================
+    story.append(Paragraph("4. Three-Phase Feature Selection Pipeline", h1_style))
     story.append(Paragraph(
-        "The feature selection pipeline uses a two-pass architecture to prune the 132 candidate features down to exactly 12:<br/>"
-        "• <b>Pass 1 (SHAP Filtering)</b>: Fits a baseline LightGBM regressor on training splits. TreeExplainer computes the mean "
-        "absolute SHAP value for each feature, filtering out weak indicators (SHAP $< 10^{-4}$).<br/>"
-        "• <b>Pass 2 (Lasso L1 Shrinkage)</b>: Fits an L1-regularized LassoCV model on standardized values. L1 regularization adds "
-        "an absolute coefficient penalty to the loss function, forcing collinear and redundant features to zero.",
+        "The feature selection pipeline implements a three-phase architecture to identify dominant signals, "
+        "eliminate non-linear noise, and compress collinear parameters:<br/>"
+        "• <b>Phase 1 (Distance Correlation)</b>: Computes the non-linear distance correlation of all 143 candidate "
+        "features against the target and pairwise between all features. The top 5 independent dominant features are isolated and kept aside.<br/>"
+        "• <b>Phase 2 (SHAP Filtering)</b>: Fits a baseline LightGBM regressor on the remaining less dominant features and computes "
+        "mean absolute SHAP values. Weak indicators (SHAP $< 10^{-4}$) are pruned.<br/>"
+        "• <b>Phase 3 (Lasso L1 Shrinkage)</b>: Combines the dominant features and SHAP-selected features, standardizes them, and "
+        "fits an L1-regularized LassoCV model to select exactly the final 12 features.",
         body_style
     ))
     
+    dcor_img = build_report_image("distance_correlation_rankings.png", width_inches=4.4)
+    if dcor_img:
+        story.append(dcor_img)
+        story.append(Spacer(1, 3))
+        story.append(Paragraph(
+            "<font size=7 color='#6B7280'>Figure 5: Phase 1 - Top 20 Candidate Features by Distance Correlation with Target.</font>",
+            body_style
+        ))
+        
     shap_img = build_report_image("shap_feature_importance.png", width_inches=4.4)
     if shap_img:
         story.append(shap_img)
         story.append(Spacer(1, 3))
         story.append(Paragraph(
-            "<font size=7 color='#6B7280'>Figure 5: Pass 1 - Top 20 Candidate Features ranked by Mean Absolute SHAP values.</font>",
-            body_style
-        ))
-        
-    lasso_img = build_report_image("lasso_coefficients.png", width_inches=4.4)
-    if lasso_img:
-        story.append(lasso_img)
-        story.append(Spacer(1, 3))
-        story.append(Paragraph(
-            "<font size=7 color='#6B7280'>Figure 6: Pass 2 - Lasso L1 weights shrinking redundant and collinear tags to zero.</font>",
+            "<font size=7 color='#6B7280'>Figure 6: Phase 2 - SHAP Importance rankings for less dominant features.</font>",
             body_style
         ))
     story.append(PageBreak())
     
-    # ================= PAGE 6: FINAL SELECTED FEATURES =================
-    story.append(Paragraph("5. Selected 12 Features & Operational Justifications", h1_style))
+    # ================= NEW PAGE: LASSO SELECTION & FINAL FEATURES =================
+    story.append(Paragraph("5. Lasso L1 Shrinkage & Final Selected Features", h1_style))
     story.append(Paragraph(
-        "The final 12 selected features represent thermodynamic indicators of the distillation column. "
-        "By focusing on these variables, the model avoids overfitting and operates with minimal latency on real-time systems:",
+        "Phase 3 fits an L1-regularized LassoCV model to shrink collinear parameters and select the final 12 features:",
         body_style
     ))
     
+    lasso_img = build_report_image("lasso_coefficients.png", width_inches=4.0)
+    if lasso_img:
+        story.append(lasso_img)
+        story.append(Spacer(1, 3))
+        story.append(Paragraph(
+            "<font size=7 color='#6B7280'>Figure 7: Phase 3 - Lasso L1 weights shrinking redundant and collinear features to zero.</font>",
+            body_style
+        ))
+        
     feat_table = build_v5_selected_features_table()
     if feat_table:
         story.append(feat_table)
     else:
         story.append(Paragraph("Error loading features table.", body_style))
-        
     story.append(PageBreak())
     
-    # ================= PAGE 7: OUT-OF-SAMPLE PERFORMANCE =================
+    # ================= PAGE 7: OUT-OF-SAMPLE PERFORMANCE & LOSS CURVES =================
     story.append(Paragraph("6. Out-of-Sample Performance Comparison", h1_style))
     story.append(Paragraph(
         "Model performance was evaluated on the out-of-sample H2 2025 test set. The table below outlines F1-Score, "
@@ -505,32 +515,48 @@ def generate_pdf(output_path="docs/Model_Performance_Report_v5.pdf"):
     else:
         story.append(Paragraph("Error loading comparison table.", body_style))
         
-    f1_comp_img = build_report_image("f1_score_comparison.png", width_inches=4.8)
+    f1_comp_img = build_report_image("f1_score_comparison.png", width_inches=4.4)
     if f1_comp_img:
         story.append(f1_comp_img)
         story.append(Spacer(1, 3))
         story.append(Paragraph(
-            "<font size=7 color='#6B7280'>Figure 7: F1-Score comparison bar chart for LSTM vs. Seq2Seq across horizons.</font>",
+            "<font size=7 color='#6B7280'>Figure 8: F1-Score comparison bar chart for LSTM vs. Seq2Seq across horizons.</font>",
+            body_style
+        ))
+        
+    epoch_img = build_report_image("lstm_epoch_loss.png", width_inches=4.4)
+    if epoch_img:
+        story.append(epoch_img)
+        story.append(Spacer(1, 3))
+        story.append(Paragraph(
+            "<font size=7 color='#6B7280'>Figure 9: LSTM Epoch Plot (Training vs. Validation MSE Loss over epochs).</font>",
             body_style
         ))
     story.append(PageBreak())
     
-    # ================= PAGE 8: SCENARIO PREDICTIONS =================
-    story.append(Paragraph("7. Upset Scenario Forecasting & Alert Lead Time", h1_style))
+    # ================= PAGE 8: SCENARIO PREDICTIONS & KDE OVERLAYS =================
+    story.append(Paragraph("7. Upset Scenario Forecasting & Distribution Overlays", h1_style))
     story.append(Paragraph(
-        "To verify model performance in the control room, predictions were evaluated during active temperature upsets. "
-        "The figure below illustrates the actual vs. predicted temperature trajectory of the 15-minute LSTM warning model. "
-        "The model tracks the heating curve, crossing the 21.0 °C threshold and providing operators with early warnings "
-        "with a false alarm rate of only 0.07%.",
+        "The models were evaluated during temperature upsets. The KDE plot overlays the temperature "
+        "distributions, while the time-series plot shows actual vs. predicted values against time.",
         body_style
     ))
     
-    upset_img = build_report_image("lstm_alert_episode.png", width_inches=4.8)
+    kde_img = build_report_image("actual_vs_predicted_kde.png", width_inches=4.4)
+    if kde_img:
+        story.append(kde_img)
+        story.append(Spacer(1, 3))
+        story.append(Paragraph(
+            "<font size=7 color='#6B7280'>Figure 10: KDE Plot - Actual vs. Predicted Temperature Distributions (Train/Val/Test overlaid).</font>",
+            body_style
+        ))
+        
+    upset_img = build_report_image("lstm_alert_episode.png", width_inches=4.4)
     if upset_img:
         story.append(upset_img)
         story.append(Spacer(1, 3))
         story.append(Paragraph(
-            "<font size=7 color='#6B7280'>Figure 8: Actual vs. Predicted temperature profile during a threshold crossing scenario.</font>",
+            "<font size=7 color='#6B7280'>Figure 11: Time Series Plot - Actual vs. Predicted values on Y-axis against time on X-axis (15 Min warning LSTM overlay).</font>",
             body_style
         ))
     story.append(PageBreak())

@@ -601,4 +601,14 @@ def generate_pdf(output_path="docs/Model_Performance_Report_v5.pdf"):
 
 
 if __name__ == "__main__":
-    generate_pdf()
+    import shutil
+    # Generate in approch_v5 first
+    os.makedirs("approch_v5", exist_ok=True)
+    v5_pdf_path = "approch_v5/Model_Performance_Report_v5.pdf"
+    generate_pdf(v5_pdf_path)
+    
+    # Copy to docs
+    os.makedirs("docs", exist_ok=True)
+    docs_pdf_path = "docs/Model_Performance_Report_v5.pdf"
+    shutil.copy(v5_pdf_path, docs_pdf_path)
+    print(f"Copied report to: {docs_pdf_path}")

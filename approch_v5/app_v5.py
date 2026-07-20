@@ -181,8 +181,15 @@ def compute_v5_features(df_history, target_col="03TIC_1023.PV"):
             base_col = feat.split('_expanding_max')[0]
             df_slice[feat] = df_slice[base_col].expanding(min_periods=1).max()
             
-    feature_row = df_slice.tail(1)[features].copy()
-    return feature_row
+    feature_window = df_slice[features].copy()
+    if len(feature_window) < 10:
+        # Pad by repeating first row to ensure sequence length is exactly 10
+        pad_len = 10 - len(feature_window)
+        pad_rows = pd.concat([feature_window.iloc[[0]]] * pad_len, ignore_index=True)
+        feature_window = pd.concat([pad_rows, feature_window], ignore_index=True)
+    else:
+        feature_window = feature_window.tail(10)
+    return feature_window
 
 # ----------------------------------------------------------------
 # Sidebar Controls
@@ -254,24 +261,21 @@ with col_left:
         # Slice history up to current step
         df_history = df_scenario.iloc[max(0, t_idx - 65) : t_idx + 1]
         
-        # Calculate features on-the-fly
-        feat_row = compute_v5_features(df_history)
+        # Calculate features on-the-fly (returns a sequence window of size 10)
+        feat_window = compute_v5_features(df_history)
         
-        # LSTM output prediction
+        # LSTM and Seq2Seq predictions
         # Scale and run through model
-        feat_scaled = scaler.transform(feat_row)
-        feat_tensor = torch.tensor(feat_scaled, dtype=torch.float32).unsqueeze(1) # shape: (1, 1, 12)
+        feat_scaled = scaler.transform(feat_window)
+        feat_tensor = torch.tensor(feat_scaled, dtype=torch.float32).unsqueeze(0) # shape: (1, 10, 12)
         
         with torch.no_grad():
             lstm_out = lstm(feat_tensor).item()
-            # De-normalize output (mock representation: shift to actual range)
-            pred_val = actuals[t_idx] + (lstm_out * 0.1) # small deviation
-            lstm_preds.append(pred_val)
+            lstm_preds.append(lstm_out)
             
             # For Seq2Seq, we simulate the horizon forecast
-            # Feed to encoder-decoder
             seq_out = seq2seq(feat_tensor).numpy().flatten()
-            seq_preds.append(actuals[t_idx] + seq_out[lead_horizon - 1] * 0.1)
+            seq_preds.append(seq_out[lead_horizon - 1])
             
     # Visualizing Plotly Line Chart
     fig = go.Figure()

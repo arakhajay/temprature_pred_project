@@ -84,52 +84,12 @@ SCENARIO_DIR = "scenarios" if os.path.exists("scenarios") else "approch_v5/scena
 ALARM_LIMIT = 21.0
 
 # ----------------------------------------------------------------
-# PyTorch Model Definitions (Matching Approach V5 Architecture)
+# PyTorch Model Imports (From Official Approach V5 models.py)
 # ----------------------------------------------------------------
-class LSTMRegressor(nn.Module):
-    def __init__(self, input_dim=12, hidden_dim=64, num_layers=2, dropout=0.2):
-        super(LSTMRegressor, self).__init__()
-        self.lstm = nn.LSTM(
-            input_size=input_dim,
-            hidden_size=hidden_dim,
-            num_layers=num_layers,
-            batch_first=True,
-            dropout=dropout if num_layers > 1 else 0.0
-        )
-        self.fc1 = nn.Linear(hidden_dim, 32)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(32, 1)
-
-    def forward(self, x):
-        lstm_out, _ = self.lstm(x)
-        last_step = lstm_out[:, -1, :]
-        out = self.fc1(last_step)
-        out = self.relu(out)
-        out = self.fc2(out)
-        return out.squeeze(-1)
-
-class Seq2Seq(nn.Module):
-    def __init__(self, input_dim=12, hidden_dim=64, forecast_len=60, num_layers=2):
-        super(Seq2Seq, self).__init__()
-        self.forecast_len = forecast_len
-        self.encoder = nn.LSTM(input_dim, hidden_dim, num_layers=num_layers, batch_first=True)
-        self.decoder_cell = nn.LSTMCell(1, hidden_dim)
-        self.fc_out = nn.Linear(hidden_dim, 1)
-
-    def forward(self, x):
-        batch_size = x.size(0)
-        _, (hidden, cell) = self.encoder(x)
-        h_t = hidden[-1]
-        c_t = cell[-1]
-        decoder_input = x[:, -1, 0:1] # Target column (03TIC_1023.PV)
-        outputs = []
-        for t in range(self.forecast_len):
-            h_t, c_t = self.decoder_cell(decoder_input, (h_t, c_t))
-            out = self.fc_out(h_t)
-            outputs.append(out)
-            decoder_input = out
-        outputs = torch.cat(outputs, dim=1)
-        return outputs
+try:
+    from models import LSTMRegressor, Seq2Seq
+except ImportError:
+    from approch_v5.models import LSTMRegressor, Seq2Seq
 
 # ----------------------------------------------------------------
 # Load Models, Scaler, and Features

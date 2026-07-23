@@ -445,17 +445,14 @@ def generate_pdf(output_path="docs/Model_Performance_Report_v5.pdf"):
         ))
     story.append(PageBreak())
     
-    # ================= PAGE 5: THREE-PHASE FEATURE SELECTION =================
-    story.append(Paragraph("4. Three-Phase Feature Selection Pipeline", h1_style))
+    # ================= PAGE 5: THREE-PHASE FEATURE SELECTION - PHASE 1 =================
+    story.append(Paragraph("4. Phase 1 - Distance Correlation Selection", h1_style))
     story.append(Paragraph(
         "The feature selection pipeline implements a three-phase architecture to identify dominant signals, "
-        "eliminate non-linear noise, and compress collinear parameters:<br/>"
-        "• <b>Phase 1 (Distance Correlation)</b>: Computes the non-linear distance correlation of all 143 candidate "
-        "features against the target and pairwise between all features. The top 5 independent dominant features are isolated and kept aside.<br/>"
-        "• <b>Phase 2 (SHAP Filtering)</b>: Fits a baseline LightGBM regressor on the remaining less dominant features and computes "
-        "mean absolute SHAP values. Weak indicators (SHAP $< 10^{-4}$) are pruned.<br/>"
-        "• <b>Phase 3 (Lasso L1 Shrinkage)</b>: Combines the dominant features and SHAP-selected features, standardizes them, and "
-        "fits an L1-regularized LassoCV model to select exactly the final 12 features.",
+        "eliminate non-linear noise, and compress collinear parameters. In **Phase 1**, we compute the non-linear "
+        "distance correlation of all 143 candidate features against the target and pairwise between all features. "
+        "The top 5 independent dominant features are isolated and kept aside, while features that are collinear (pairwise DC >= 0.90) "
+        "with already selected features are skipped.",
         body_style
     ))
     
@@ -464,24 +461,45 @@ def generate_pdf(output_path="docs/Model_Performance_Report_v5.pdf"):
         story.append(dcor_img)
         story.append(Spacer(1, 3))
         story.append(Paragraph(
-            "<font size=7 color='#6B7280'>Figure 5: Phase 1 - Top 20 Candidate Features by Distance Correlation with Target.</font>",
+            "<font size=7 color='#6B7280'>Figure 5: Top 20 Candidate Features by Distance Correlation with Target.</font>",
             body_style
         ))
         
+    pcor_img = build_report_image("pairwise_distance_correlation_heatmap.png", width_inches=4.4)
+    if pcor_img:
+        story.append(pcor_img)
+        story.append(Spacer(1, 3))
+        story.append(Paragraph(
+            "<font size=7 color='#6B7280'>Figure 6: Pairwise Distance Correlation Heatmap (Top 15 Candidate Features).</font>",
+            body_style
+        ))
+    story.append(PageBreak())
+    
+    # ================= PAGE 6: FEATURE SELECTION - PHASE 2 =================
+    story.append(Paragraph("5. Phase 2 - SHAP Importance on Less Dominant Features", h1_style))
+    story.append(Paragraph(
+        "In **Phase 2**, we fit a baseline LightGBM regressor on the remaining less dominant features and compute "
+        "mean absolute SHAP values. Weak indicators (SHAP $< 10^{-4}$) are pruned, keeping only the features with "
+        "strong non-linear predictive capabilities.",
+        body_style
+    ))
+    
     shap_img = build_report_image("shap_feature_importance.png", width_inches=4.4)
     if shap_img:
         story.append(shap_img)
         story.append(Spacer(1, 3))
         story.append(Paragraph(
-            "<font size=7 color='#6B7280'>Figure 6: Phase 2 - SHAP Importance rankings for less dominant features.</font>",
+            "<font size=7 color='#6B7280'>Figure 7: Phase 2 - SHAP Importance rankings for less dominant features.</font>",
             body_style
         ))
     story.append(PageBreak())
     
-    # ================= NEW PAGE: LASSO SELECTION & FINAL FEATURES =================
-    story.append(Paragraph("5. Lasso L1 Shrinkage & Final Selected Features", h1_style))
+    # ================= PAGE 7: FEATURE SELECTION - PHASE 3 =================
+    story.append(Paragraph("6. Phase 3 - Lasso L1 Shrinkage & Final Selected Features", h1_style))
     story.append(Paragraph(
-        "Phase 3 fits an L1-regularized LassoCV model to shrink collinear parameters and select the final 12 features:",
+        "In **Phase 3**, we combine the 5 dominant features from Phase 1 and the SHAP-selected features from Phase 2, "
+        "standardize them, and fit an L1-regularized LassoCV model to select exactly the final 12 features. The Lasso penalty "
+        "shrinks redundant and collinear sensor weights to zero, selecting only the most predictive sensor from collinear groups.",
         body_style
     ))
     
@@ -490,7 +508,7 @@ def generate_pdf(output_path="docs/Model_Performance_Report_v5.pdf"):
         story.append(lasso_img)
         story.append(Spacer(1, 3))
         story.append(Paragraph(
-            "<font size=7 color='#6B7280'>Figure 7: Phase 3 - Lasso L1 weights shrinking redundant and collinear features to zero.</font>",
+            "<font size=7 color='#6B7280'>Figure 8: Phase 3 - Lasso L1 weights shrinking redundant and collinear features to zero.</font>",
             body_style
         ))
         
@@ -501,8 +519,8 @@ def generate_pdf(output_path="docs/Model_Performance_Report_v5.pdf"):
         story.append(Paragraph("Error loading features table.", body_style))
     story.append(PageBreak())
     
-    # ================= PAGE 7: OUT-OF-SAMPLE PERFORMANCE & LOSS CURVES =================
-    story.append(Paragraph("6. Out-of-Sample Performance Comparison", h1_style))
+    # ================= PAGE 8: OUT-OF-SAMPLE PERFORMANCE COMPARISON =================
+    story.append(Paragraph("7. Out-of-Sample Performance Comparison", h1_style))
     story.append(Paragraph(
         "Model performance was evaluated on the out-of-sample H2 2025 test set. The table below outlines F1-Score, "
         "Precision, Recall, False Alarm Rate, MAE, and RMSE for both LSTM and Seq2Seq models across prediction horizons.",
@@ -520,22 +538,40 @@ def generate_pdf(output_path="docs/Model_Performance_Report_v5.pdf"):
         story.append(f1_comp_img)
         story.append(Spacer(1, 3))
         story.append(Paragraph(
-            "<font size=7 color='#6B7280'>Figure 8: F1-Score comparison bar chart for LSTM vs. Seq2Seq across horizons.</font>",
+            "<font size=7 color='#6B7280'>Figure 9: F1-Score comparison bar chart for LSTM vs. Seq2Seq across horizons.</font>",
             body_style
         ))
-        
+    story.append(PageBreak())
+    
+    # ================= PAGE 9: DEEP LEARNING LOSS CURVES =================
+    story.append(Paragraph("8. Deep Learning Training Loss Curves", h1_style))
+    story.append(Paragraph(
+        "Training and validation MSE loss curves monitor model convergence. Both curves drop consistently and "
+        "stabilize, indicating stable parameter updates without overfitting.",
+        body_style
+    ))
+    
     epoch_img = build_report_image("lstm_epoch_loss.png", width_inches=4.4)
     if epoch_img:
         story.append(epoch_img)
         story.append(Spacer(1, 3))
         story.append(Paragraph(
-            "<font size=7 color='#6B7280'>Figure 9: LSTM Epoch Plot (Training vs. Validation MSE Loss over epochs).</font>",
+            "<font size=7 color='#6B7280'>Figure 10: LSTM Epoch Plot (Training vs. Validation MSE Loss over epochs).</font>",
+            body_style
+        ))
+        
+    seq2seq_epoch_img = build_report_image("seq2seq_epoch_loss.png", width_inches=4.4)
+    if seq2seq_epoch_img:
+        story.append(seq2seq_epoch_img)
+        story.append(Spacer(1, 3))
+        story.append(Paragraph(
+            "<font size=7 color='#6B7280'>Figure 11: Seq2Seq Epoch Plot (Training vs. Validation MSE Loss over epochs).</font>",
             body_style
         ))
     story.append(PageBreak())
     
-    # ================= PAGE 8: SCENARIO PREDICTIONS & KDE OVERLAYS =================
-    story.append(Paragraph("7. Upset Scenario Forecasting & Distribution Overlays", h1_style))
+    # ================= PAGE 10: SCENARIO PREDICTIONS & KDE OVERLAYS =================
+    story.append(Paragraph("9. Upset Scenario Forecasting & Distribution Overlays", h1_style))
     story.append(Paragraph(
         "The models were evaluated during temperature upsets. The KDE plot overlays the temperature "
         "distributions, while the time-series plot shows actual vs. predicted values against time.",
@@ -547,7 +583,7 @@ def generate_pdf(output_path="docs/Model_Performance_Report_v5.pdf"):
         story.append(kde_img)
         story.append(Spacer(1, 3))
         story.append(Paragraph(
-            "<font size=7 color='#6B7280'>Figure 10: KDE Plot - Actual vs. Predicted Temperature Distributions (Train/Val/Test overlaid).</font>",
+            "<font size=7 color='#6B7280'>Figure 12: KDE Plot - Actual vs. Predicted Temperature Distributions (Train/Val/Test overlaid).</font>",
             body_style
         ))
         
@@ -556,7 +592,7 @@ def generate_pdf(output_path="docs/Model_Performance_Report_v5.pdf"):
         story.append(upset_img)
         story.append(Spacer(1, 3))
         story.append(Paragraph(
-            "<font size=7 color='#6B7280'>Figure 11: Time Series Plot - Actual vs. Predicted values on Y-axis against time on X-axis (15 Min warning LSTM overlay).</font>",
+            "<font size=7 color='#6B7280'>Figure 13: Time Series Plot - Actual vs. Predicted values on Y-axis against time (15 Min warning LSTM overlay).</font>",
             body_style
         ))
     story.append(PageBreak())
